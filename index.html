@@ -21,5 +21,12 @@
       <button id="run">一枚絵を生成</button><div id="status" aria-live="polite"></div>
     </div>
   </section>
-  <section id="result" class="result" hidden><div class="result-head"><div><span class="eyebrow">RESULT</span><h2>結合できました</h2></div><button id="download">PNGで保存</button></div><div class="canvas-wrap"><canvas id="output"></canvas></div></section>
+  <section id="result" class="result" hidden><div class="result-head"><div><span class="eyebrow">RESULT</span><h2>結合できました</h2></div><button id="download">PNGで保存</button></div>
+    <div id="seamEditor" class="seam-editor">
+      <div><span class="eyebrow">SEAM EDITOR</span><strong>境界 <span id="seamNumber">1 / 1</span></strong><small>選んだ境界より後ろだけが追従します</small></div>
+      <label>調整する境界<input id="seamSelect" type="range" min="0" max="0" value="0" step="1"></label>
+      <div class="pixel-adjust"><button id="minusPixel" class="secondary" type="button">−1px</button><label>移動量<input id="seamOffset" type="number" value="0" step="1"><small id="offsetDirection">0px</small></label><button id="plusPixel" class="secondary" type="button">＋1px</button><button id="resetSeam" class="secondary" type="button">リセット</button></div>
+    </div>
+    <div class="canvas-wrap"><canvas id="output"></canvas></div>
+  </section>
 </main><canvas id="work" hidden></canvas><script type="module" src="/src/main.js"></script></body></html>
