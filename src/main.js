@@ -26,6 +26,8 @@ function renderPanorama(){
   const octx=out.getContext('2d');octx.imageSmoothingEnabled=false;
   const draw=(frame,sx,sy,sw,sh,dx,dy)=>{work.getContext('2d').putImageData(frame.img,0,0);octx.drawImage(work,sx,sy,sw,sh,Math.round(dx),Math.round(dy),sw,sh)};
   const drawBand=(frame,p,start,end)=>{const sourceStart=Math.max(0,Math.round(start-p)),size=Math.min(length-sourceStart,Math.round(end-start));if(size<=0)return;if(vertical)draw(frame,0,sourceStart,w,size,0,start-min);else draw(frame,sourceStart,0,size,h,start-min,0)};
+  const EDGE_GUARD=4,canvasEnd=max+length;
+  const drawSafeAnchor=(frame,p,start,end)=>{const safeStart=p>min?Math.max(start,p+EDGE_GUARD):start,safeEnd=p+length<canvasEnd?Math.min(end,p+length-EDGE_GUARD):end;drawBand(frame,p,safeStart,safeEnd)};
   editorState.boundaries=[];
   for(let i=0;i<spatial.length;i++){
     const frame=spatial[i],p=Math.round(frame.pos);
@@ -36,11 +38,11 @@ function renderPanorama(){
   }
   const adjustedAnchorPos=anchor=>{let offset=0;for(let i=0;i<base.length-1;i++)if(anchor.pos>=base[i+1].pos)offset+=adjustments[i]||0;return Math.round(anchor.pos+offset)};
   const anchored=anchors.map(frame=>({frame,pos:adjustedAnchorPos(frame)})).sort((a,b)=>a.pos-b.pos);
-  if(anchored.length===1)drawBand(anchored[0].frame,anchored[0].pos,anchored[0].pos,anchored[0].pos+length);
+  if(anchored.length===1)drawSafeAnchor(anchored[0].frame,anchored[0].pos,anchored[0].pos,anchored[0].pos+length);
   else{
     const [left,right]=anchored,leftEnd=left.pos+length,rightEnd=right.pos+length;
-    if(leftEnd<=right.pos){drawBand(left.frame,left.pos,left.pos,leftEnd);drawBand(right.frame,right.pos,right.pos,rightEnd)}
-    else{const split=Math.round((right.pos+leftEnd)/2);drawBand(left.frame,left.pos,left.pos,split);drawBand(right.frame,right.pos,split,rightEnd)}
+    if(leftEnd<=right.pos){drawSafeAnchor(left.frame,left.pos,left.pos,leftEnd);drawSafeAnchor(right.frame,right.pos,right.pos,rightEnd)}
+    else{const split=Math.round((right.pos+leftEnd)/2);drawSafeAnchor(left.frame,left.pos,left.pos,split);drawSafeAnchor(right.frame,right.pos,split,rightEnd)}
   }
 }
 function focusSeam(){const index=+$ ('#seamSelect').value,boundary=editorState.boundaries[index],wrap=$('.canvas-wrap'),scale=out.clientWidth/out.width;if(editorState.axis==='vertical')wrap.scrollTop=Math.max(0,boundary*scale-wrap.clientHeight/2);else wrap.scrollLeft=Math.max(0,boundary*scale-wrap.clientWidth/2)}
